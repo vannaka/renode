@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "Renode",
+			"path": ".."
+		},
+		{
+			"name": "Infrastructure",
+			"path": "../src/Infrastructure"
+		},
+		{
+			"name": "TLib",
+			"path": "../src/Infrastructure/src/Emulator/Cores/tlib"
+		}
+	],
+	"settings": {
+		"esbonio.sphinx.confDir": "",
+		"dotnet.preferCSharpExtension": true,
+		"dotnet.defaultSolution": "Renode/Renode.sln"
+	}
+}

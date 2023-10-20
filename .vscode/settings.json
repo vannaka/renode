@@ -1,0 +1,4 @@
+{
+    "dotnet.preferCSharpExtension": true,
+    "cmake.sourceDirectory": "/home/luke/Documents/Code/renode/src/Infrastructure/src/Emulator/Cores/tlib"
+}
