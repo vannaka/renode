@@ -30,9 +30,11 @@ spi0: SPI.Cadence_SPI @ sysbus 0xE0006000
 spi1: SPI.Cadence_SPI @ sysbus 0xE0007000
     -> gic@49
 
-sdhci0: SD.SDHCI @ sysbus <0xE0100000, +0x1000>
+sdhci0: SD.ZynqSDController @ sysbus <0xE0100000, +0x1000>
+    -> gic@59
 
-sdhci1: SD.SDHCI @ sysbus <0xE0101000, +0x1000>
+sdhci1: SD.ZynqSDController @ sysbus <0xE0101000, +0x1000>
+    -> gic@79
 
 memory: Memory.MappedMemory @ sysbus 0x0
     size: 0x40000000

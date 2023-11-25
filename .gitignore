@@ -25,3 +25,5 @@ packages
 perf.data
 perf.script
 .venv
+
+/build
