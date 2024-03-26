@@ -12,7 +12,7 @@ ${ZYNQ_MCAN_PERIPHERALS}                           SEPARATOR=\n
 ...                                                ${SPACE*4}Line1 -> gic@31
 ...                                                ${SPACE*4}Calibration -> gic@32
 ...                                                ${SPACE*4}messageRAM: canMessageRAM
-...                                                
+...
 ...                                                canMessageRAM: Memory.ArrayMemory @ sysbus <0xe0108000, +0x22000>
 ...                                                ${SPACE*4}size: 0x22000
 ...                                                """
@@ -32,7 +32,7 @@ ${SAMPLES_DRIVERS_CAN_COUNTER_LOOPBACK_BIN}        @https://dl.antmicro.com/proj
 ${SAMPLES_DRIVERS_CAN_COUNTER_NO_LOOPBACK_BIN}     @https://dl.antmicro.com/projects/renode/nucleo_h743zi--zephyr-samples-drivers-can-counter.elf-s_1391464-17e71d5820ab718e5dc89f8480644c576306d24c
 # Linux with support for MCAN
 ${ZYNQ_MCAN_BIN}                                   @https://dl.antmicro.com/projects/renode/zynq--linux-mcan.elf-s_14394628-0381324a8046cfb3f7a3f08364acd364588d2f03
-${ZYNQ_MCAN_ROOTFS}                                @https://dl.antmicro.com/projects/renode/zynq--linux-mcan-rootfs.ext2-s_16777216-fb63c58c39db51545817865a0f04895d7c96e0b4
+${ZYNQ_MCAN_ROOTFS}                                @https://dl.antmicro.com/projects/renode/zynq--linux-mcan-rootfs.ext2-s_16777216-485d90cf2065794b6bbb68768315d1310387a0cc
 ${ZYNQ_MCAN_DTB}                                   @https://dl.antmicro.com/projects/renode/zynq--linux-mcan.dtb-s_12849-650fd5a9575fd9e2917e5f9dd2677014cbd7af11
 
 *** Keywords ***
@@ -44,7 +44,7 @@ Create STM32H7 Machine
     [Arguments]               ${bin}  ${name}=machine-0
     Execute Command           $bin=${bin}
     Execute Command           mach create "${name}"
-    Execute Command           machine LoadPlatformDescription @platforms/cpus/stm32h743.repl
+    Execute Command           machine LoadPlatformDescription @platforms/cpus/stm32h753.repl
     Execute Command           sysbus LoadELF ${bin}
     Execute Command           connector Connect ${CAN} ${CAN_HUB}
     Execute Command           showAnalyzer ${UART}
@@ -55,7 +55,7 @@ Create Zynq Machine
     Execute Command           $bin=${ZYNQ_MCAN_BIN}
     Execute Command           $rootfs=${ZYNQ_MCAN_ROOTFS}
     Execute Command           $dtb=${ZYNQ_MCAN_DTB}
-    Execute Command           include @scripts/single-node/zynq-7000.resc
+    Execute Command           include @scripts/single-node/zedboard.resc
     Execute Command           machine LoadPlatformDescriptionFromString ${ZYNQ_MCAN_PERIPHERALS}
     Execute Command           connector Connect ${ZYNQ_CAN} ${CAN_HUB}
 
@@ -98,7 +98,7 @@ Should Pass Zephyr CAN ISOTP Conformance Test
     Create STM32H7 Machine    ${TESTS_SUBSYS_CANBUS_ISOTP_CONFORMANCE_BIN}
     Create Terminal Tester    ${UART}
 
-    Wait For Line On Uart     PROJECT EXECUTION SUCCESSFUL
+    Wait For Line On Uart     PROJECT EXECUTION SUCCESSFUL  timeout=12
 
 Should Pass Zephyr CAN API Test
     Create CAN Hub
@@ -126,7 +126,7 @@ Should Use CAN ISOTP Protocol To Exchange Messages In Loopback Mode
     Create STM32H7 Machine    ${SAMPLES_SUBSYS_CANBUS_ISOTP_LOOPBACK_BIN}
     Create Terminal Tester    ${UART}
 
-    # Wait for several successful transmissions 
+    # Wait for several successful transmissions
     ${cnt}=                   Set Variable  40
     FOR  ${i}  IN RANGE  0  ${cnt}
         Wait For Line On Uart     Got 247 bytes in total
@@ -145,7 +145,7 @@ Should Use CAN ISOTP Protocol To Exchange Messages Between Machines
     Create STM32H7 Machine    ${SAMPLES_SUBSYS_CANBUS_ISOTP_NO_LOOPBACK_BIN}  machine-1
     ${tester-1}=              Create Terminal Tester  ${UART}  machine=machine-1
 
-    # Wait for several successful transmissions 
+    # Wait for several successful transmissions
     ${cnt}=                   Set Variable  40
     FOR  ${i}  IN RANGE  0  ${cnt}
         Wait For Line On Uart     Got 247 bytes in total  testerId=${tester-0}
@@ -161,7 +161,7 @@ Should Use CAN Socket API To Exchange Messages In Loopback Mode
     Create STM32H7 Machine    ${SAMPLES_NET_SOCKETS_CAN_LOOPBACK_BIN}
     Create Terminal Tester    ${UART}
 
-    # Wait for several successful transmissions 
+    # Wait for several successful transmissions
     ${cnt}=                   Set Variable  40
     FOR  ${i}  IN RANGE  0  ${cnt}
         Wait For Line On Uart     net_socket_can_sample: [0] CAN frame: IDE 0x0 RTR 0x0 ID 0x1 DLC 0x8
@@ -178,7 +178,7 @@ Should Use CAN Socket API To Exchange Messages Between Machines
     Execute Command           emulation SetGlobalQuantum "0.000025"
     Execute Command           emulation SetGlobalSerialExecution True
 
-    # Wait for several successful transmissions 
+    # Wait for several successful transmissions
     ${cnt}=                   Set Variable  40
     FOR  ${i}  IN RANGE  0  ${cnt}
         Wait For Line On Uart     net_socket_can_sample: [0] CAN frame: IDE 0x0 RTR 0x0 ID 0x1 DLC 0x8  testerId=${tester-0}
@@ -192,7 +192,7 @@ Should Run Zephyr CAN Counter Sample In Loopback Mode
     Create STM32H7 Machine    ${SAMPLES_DRIVERS_CAN_COUNTER_LOOPBACK_BIN}
     Create Terminal Tester    ${UART}
 
-    # Wait for several successful transmissions 
+    # Wait for several successful transmissions
     ${cnt}=                   Set Variable  40
     FOR  ${i}  IN RANGE  0  ${cnt}
         Wait For Line On Uart     Counter received: ${i}
@@ -209,7 +209,7 @@ Should Run Zephyr CAN Counter Sample To Exchange Messages Between Machines
     Execute Command           emulation SetGlobalQuantum "0.000025"
     Execute Command           emulation SetGlobalSerialExecution True
 
-    # Wait for several successful transmissions 
+    # Wait for several successful transmissions
     ${cnt}=                   Set Variable  40
     FOR  ${i}  IN RANGE  0  ${cnt}
         Wait For Line On Uart     Counter received: ${i}  testerId=${tester-0}
@@ -225,7 +225,7 @@ Should Boot Linux And Login With MCAN
     # Lower quantum to keep synchronization between machines
     Execute Command           emulation SetGlobalQuantum "0.000025"
     Execute Command           emulation SetGlobalSerialExecution True
-    
+
     Boot And Login            ${tester-0}
     Boot And Login            ${tester-1}
     # Suppress messages from the kernel space

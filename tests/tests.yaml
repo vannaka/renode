@@ -6,7 +6,7 @@
 
 - tests/example.robot
 - tests/platforms/CC2538/cc2538_cryptoprocessor.robot
-- tests/platforms/QuarkC1000/QuarkC1000.robot
+- tests/platforms/QuarkC1000.robot
 - tests/unit-tests/llvm-disassemble.robot
 - tests/unit-tests/emulation-environment.robot
 - tests/unit-tests/platform_descriptions.robot
@@ -60,6 +60,8 @@
 - tests/peripherals/LSM303.robot
 - tests/peripherals/MC3635.robot
 - tests/peripherals/MCAN.robot
+- tests/peripherals/HS3001.robot
+- tests/peripherals/DA16200.robot
 - tests/unit-tests/AdHocCompiler/adhoc-compiler.robot
 - tests/platforms/OpenTitan-EarlGrey.robot
 - tests/platforms/Arnold.robot
@@ -69,12 +71,11 @@
 - tests/platforms/LiteX/LiteX_Ibex.robot
 - tests/platforms/QuickFeather.robot
 - tests/platforms/STM32F072b.robot
-- tests/platforms/Zedboard.robot
 - tests/platforms/Leon3.robot
 - tests/platforms/GR716.robot
 - tests/platforms/MPC5567.robot
 - tests/platforms/xtensa.robot
-- tests/platforms/zynq-7000.robot
+- tests/platforms/Zedboard.robot
 - tests/unit-tests/InterruptHooks/arm-m.robot
 - tests/unit-tests/arm-cortex-m-fpu.robot
 - tests/unit-tests/log-tests.robot
@@ -99,6 +100,7 @@
 - tests/unit-tests/non-blockng-step.robot
 - tests/platforms/STM32L072.robot
 - tests/unit-tests/hifive1-pmp.robot
+- tests/unit-tests/hifive1-gpio-int.robot
 - tests/unit-tests/real-time-clock-mode.robot
 - tests/platforms/MAX32650.robot
 - tests/unit-tests/pmp.robot
@@ -107,6 +109,7 @@
 - tests/unit-tests/riscv-ebreak.robot
 - tests/platforms/ARMv8A.robot
 - tests/platforms/ARMv8R.robot
+- tests/platforms/ARMv8R-PMSA.robot
 - tests/platforms/ARMv8M.robot
 - tests/peripherals/NRF52840_GPIO.robot
 - tests/platforms/nucleo_wba52cg.robot
@@ -125,3 +128,17 @@
 - tests/unit-tests/ARMv8R_TCM.robot
 - tests/tools/execution_tracer_reader.robot
 - tests/peripherals/LIS2DW12.robot
+- tests/unit-tests/arm-performance-monitoring-unit.robot
+- tests/peripherals/ARM_GenericInterruptController.robot
+- tests/platforms/Versatile.robot
+- tests/unit-tests/arm-wfi-hook.robot
+- tests/platforms/Renesas_RA6M5.robot
+- tests/platforms/Renesas_RA4M1.robot
+- tests/platforms/Renesas_RA8M1.robot
+- tests/platforms/Renesas_DA14592.robot
+- tests/peripherals/ICP_101xx.robot
+- tests/unit-tests/grammar-number-separator.robot
+- tests/peripherals/PL330_DMA.robot
+- tests/platforms/GR712RC.robot
+- tests/platforms/nucleo_h753zi.robot
+- tests/platforms/EK-RA2E1.robot

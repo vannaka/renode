@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2010-2023 Antmicro
+// Copyright (c) 2010-2024 Antmicro
 //
 // This file is licensed under the MIT License.
 // Full license text is available in 'licenses/MIT.txt'.
@@ -23,6 +23,9 @@ namespace Antmicro.Renode.RobotFramework
         {
             // we need to use synchronous logging in order to pause the emulation precisely
             EmulationManager.Instance.CurrentEmulation.CurrentLogger.SynchronousLogging = true;
+#if TRACE_ENABLED
+            Logger.Log(LogLevel.Warning, "Using LogTester with tracing enabled will cause deadlock on pausing emulation.");
+#endif
 
             this.defaultTimeout = virtualSecondsTimeout;
             messages = new List<LogEntry>();
@@ -62,7 +65,10 @@ namespace Antmicro.Renode.RobotFramework
 
                 if(pauseEmulation)
                 {
-                    if(!EmulationManager.Instance.CurrentEmulation.TryGetExecutionContext(out var machine, out var __))
+#if TRACE_ENABLED
+                    throw new InvalidOperationException("Pausing emulation in LogTester with tracing enabled causes deadlock.");
+#endif
+                    if(!EmulationManager.Instance.CurrentEmulation.TryGetExecutionContext(out var machine, out var cpu) || !cpu.OnPossessedThread)
                     {
                         // we are not on a CPU thread so we can issue a global pause
                         EmulationManager.Instance.CurrentEmulation.PauseAll();
@@ -90,7 +96,7 @@ namespace Antmicro.Renode.RobotFramework
             if(level != null)
             {
                 var innerPredicate = predicate;
-                predicate = x => innerPredicate(x) && x.Type == level;
+                predicate = x => x.Type == level && innerPredicate(x);
             }
             var effectiveTimeout = timeout ?? defaultTimeout;
 
@@ -108,17 +114,25 @@ namespace Antmicro.Renode.RobotFramework
             }
 
             var emulationPausedEvent = emulation.GetStartedStateChangedEvent(false);
+            var timeoutEvent = emulation.MasterTimeSource.EnqueueTimeoutEvent((ulong)(effectiveTimeout * 1000), () =>
+            {
+                if(this.pauseEmulation)
+                {
+                    emulation.PauseAll();
+                }
+            });
+
             if(!emulation.IsStarted)
             {
                 emulation.StartAll();
             }
 
-            var timeoutEvent = emulation.MasterTimeSource.EnqueueTimeoutEvent((ulong)(effectiveTimeout * 1000));
             var eventId = WaitHandle.WaitAny(new [] { timeoutEvent.WaitHandle, predicateEvent });
 
             if(eventId == 1)
             {
                 // predicate event; we know the machine is paused, now we need to check for the rest of the emulation to stop
+                timeoutEvent.Cancel();
                 if(pauseEmulation)
                 {
                     emulationPausedEvent.WaitOne();
@@ -127,6 +141,14 @@ namespace Antmicro.Renode.RobotFramework
 
             // let's check for the last time and lock any incoming messages
             return FlushAndCheckLocked(emulation, predicate, keep, out bufferedMessages);
+        }
+
+        public void ClearHistory()
+        {
+            lock(messages)
+            {
+                messages.Clear();
+            }
         }
 
         private string FlushAndCheckLocked(Emulation emulation, Predicate<LogEntry> predicate, bool keep, out IEnumerable<string> bufferedMessages)

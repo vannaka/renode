@@ -15,6 +15,8 @@ SAMPLE_TYPE = Enum(Int16ul,
     ANGULAR_RATE = 0x0003,
     VOLTAGE      = 0x0004,
     ECG          = 0x0005,
+    HUMIDITY     = 0x0006,
+    PRESSURE     = 0x0007,
 
     CUSTOM       = 0xF000,
 )
@@ -69,6 +71,8 @@ data_block_sample = lambda sample_type: Switch(sample_type, {
     ),
     "VOLTAGE": Int32ul,
     "ECG": Int32sl,
+    "HUMIDITY": Int32ul,
+    "PRESSURE": Int64ul,
 })
 
 data_block_sample_arbitrary = lambda sample_type: Struct(

@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2010-2023 Antmicro
+// Copyright (c) 2010-2024 Antmicro
 //
 //  This file is licensed under the MIT License.
 //  Full license text is available in 'licenses/MIT.txt'.
@@ -78,7 +78,7 @@ namespace Antmicro.Renode.Plugins.VerilatorPlugin.Connection
 
         public void Connect()
         {
-            // intentionally left empty
+            IsConnected = true;
         }
 
         public void HandleMessage()
@@ -199,7 +199,6 @@ namespace Antmicro.Renode.Plugins.VerilatorPlugin.Connection
                         initializeNative();
                         mainResponsePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ProtocolMessage)));
                         senderResponsePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(ProtocolMessage)));
-                        IsConnected = true;
                         resetPeripheral();
                     }
                     catch(Exception e)

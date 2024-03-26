@@ -14,25 +14,24 @@ ${nonexisting_csr}            0xfff0d073
 
 
 *** Keywords ***
-Create Machine 32
+Create Machine
+    [Arguments]    ${bitness}    ${init_pc}
     Execute Command           using sysbus
     Execute Command           mach create "risc-v"
 
     Execute Command           machine LoadPlatformDescriptionFromString "clint: IRQControllers.CoreLevelInterruptor @ sysbus 0x44000000 { frequency: 66000000 }"
-    Execute Command           machine LoadPlatformDescriptionFromString "cpu: CPU.RiscV32 @ sysbus { timeProvider: clint; cpuType: \\"rv32gc\\" }"
+    Execute Command           machine LoadPlatformDescriptionFromString "cpu: CPU.RiscV${bitness} @ sysbus { timeProvider: clint; cpuType: \\"rv${bitness}gc\\" }"
     Execute Command           machine LoadPlatformDescriptionFromString "mem: Memory.MappedMemory @ sysbus 0x1000 { size: 0x40000 }"
 
-    Execute Command           cpu PC ${starting_pc}
+    IF    ${init_pc}
+       Execute Command           cpu PC ${starting_pc}
+    END
+
+Create Machine 32
+    Create Machine    bitness=32  init_pc=True
 
 Create Machine 64
-    Execute Command           using sysbus
-    Execute Command           mach create "risc-v"
-
-    Execute Command           machine LoadPlatformDescriptionFromString "clint: IRQControllers.CoreLevelInterruptor @ sysbus 0x44000000 { frequency: 66000000 }"
-    Execute Command           machine LoadPlatformDescriptionFromString "cpu: CPU.RiscV64 @ sysbus { timeProvider: clint; cpuType: \\"rv64gc\\" }"
-    Execute Command           machine LoadPlatformDescriptionFromString "mem: Memory.MappedMemory @ sysbus 0x1000 { size: 0x40000 }"
-
-    Execute Command           cpu PC ${starting_pc}
+    Create Machine    bitness=64  init_pc=True
 
 Write Opcode To
     [Arguments]                         ${adress}   ${opcode}
@@ -57,6 +56,46 @@ Load Program With Invalid Instruction
     Write Opcode To  ${start_pc+28}  ${addi_opcode}            #addi x11 x10 0
     Write Opcode To  ${start_pc+32}  ${vector_opcode}          #vadd.vv v0, v0, v0, v0.t
     Write Opcode To  ${start_pc+36}  ${addi_opcode}            #addi x11 x10 0
+
+Set ResetVector And Verify PC
+    [Arguments]    ${reset_vector}    ${should_set_pc}
+    IF    ${should_set_pc}
+        ${expected_pc}=  Set Variable     ${reset_vector}
+    ELSE
+        ${expected_pc}=  Execute Command  cpu PC
+    END
+    Execute Command                cpu ResetVector ${reset_vector}
+    Verify PC                      ${expected_pc}
+
+Should Properly Handle ResetVector
+    # Setting ResetVector before setting PC directly, with LoadELF etc. should propagate to PC.
+    Set ResetVector And Verify PC   0x1234    should_set_pc=True
+    Set ResetVector And Verify PC   0x1238    should_set_pc=True
+
+    # Setting PC other than as an effect of ResetVector should stop the propagation.
+    ${new_reset_vector_value}=  Set Variable  0x123C
+    Execute Command                 cpu PC 0x5678
+    Set ResetVector And Verify PC   ${new_reset_vector_value}    should_set_pc=False
+
+    # Reset should set PC to ResetVector and restore PC propagation on ResetVector.
+    Execute Command                 cpu Reset
+    Verify PC                       ${new_reset_vector_value}
+    Set ResetVector And Verify PC   0x1240    should_set_pc=True
+
+Should Properly Handle ResetVector At Init And After Reset
+    Verify PC                       0x1000  # Default ResetVector
+    Should Properly Handle ResetVector
+
+    ${new_reset_vector_value}=  Set Variable    0x2468
+    Execute Command                 cpu ResetVector ${new_reset_vector_value}
+    Execute Command                 cpu Reset
+    Verify PC                       ${new_reset_vector_value}
+    Should Properly Handle ResetVector
+
+Verify PC
+    [Arguments]    ${expected_pc}
+    ${pc}=  Execute Command        cpu PC
+    Should Be Equal As Integers    ${pc}    ${expected_pc}
 
 *** Test Cases ***
 Should Handle LB
@@ -422,3 +461,11 @@ Should Exit Translation Block After Invalid Instruction And Report Single Error
     Wait For Log Entry              instruction set is not enabled for this CPU! PC: 0x${illegal_opcode_1_pc_hex}
     Should Not Be In Log            instruction set is not enabled for this CPU! PC: 0x${illegal_opcode_2_pc_hex}   0
     Should Not Be In Log            instruction set is not enabled for this CPU! PC: 0x${illegal_opcode_3_pc_hex}   0
+
+Should Properly Handle ResetVector After Creation And After Reset 32
+    Create Machine                  bitness=32  init_pc=False
+    Should Properly Handle ResetVector At Init And After Reset
+
+Should Properly Handle ResetVector After Creation And After Reset 64
+    Create Machine                  bitness=64  init_pc=False
+    Should Properly Handle ResetVector At Init And After Reset

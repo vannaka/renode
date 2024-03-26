@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2010-2023 Antmicro
+// Copyright (c) 2010-2024 Antmicro
 //
 // This file is licensed under the MIT License.
 // Full license text is available in 'licenses/MIT.txt'.
@@ -261,39 +261,52 @@ namespace Antmicro.Renode.RobotFramework
         }
 
         [RobotFrameworkKeyword(replayMode: Replay.Always)]
-        public void CreateLogTester(float timeout)
+        public void CreateLogTester(float timeout, bool? defaultPauseEmulation = null)
         {
+            this.defaultPauseEmulation = defaultPauseEmulation.GetValueOrDefault();
             logTester = new LogTester(timeout);
             Logging.Logger.AddBackend(logTester, "Log Tester", true);
         }
 
         [RobotFrameworkKeyword]
         public string WaitForLogEntry(string pattern, float? timeout = null, bool keep = false, bool treatAsRegex = false,
-            bool pauseEmulation = false, LogLevel level = null)
+            bool? pauseEmulation = null, LogLevel level = null)
         {
             CheckLogTester();
 
-            var result = logTester.WaitForEntry(pattern, out var bufferedMessages, timeout, keep, treatAsRegex, pauseEmulation, level);
+            var result = logTester.WaitForEntry(pattern, out var bufferedMessages, timeout, keep, treatAsRegex, pauseEmulation ?? defaultPauseEmulation, level);
             if(result == null)
             {
-                var logMessages = string.Join("\n ", bufferedMessages);
-                throw new KeywordException($"Expected pattern \"{pattern}\" did not appear in the log\nBuffered log messages are: \n {logMessages}");
+                // We must limit the length of the resulting string to Int32.MaxValue to avoid OutOfMemoryException. 
+                // We could do it accurately, but it doesn't seem worth here, because the goal is just to provide some extra context to the exception message.
+                // We arbitrarily chose the number of messages to include here. In theory it could still throw during string.Join operation given very long messages,
+                // but it's unlikely to happen given the value of Int32.MaxValue = 2,147,483,647.
+                var logContextMessages = bufferedMessages.TakeLast(MaxLogContextPrintedOnException);
+                var logMessages = string.Join("\n ", logContextMessages);
+                throw new KeywordException($"Expected pattern \"{pattern}\" did not appear in the log\nLast {logContextMessages.Count()} buffered log messages are: \n {logMessages}");
             }
             return result;
         }
 
         [RobotFrameworkKeyword]
-        public void ShouldNotBeInLog(String pattern, float? timeout = null, bool treatAsRegex = false, LogLevel level = null)
+        public void ShouldNotBeInLog(String pattern, float? timeout = null, bool treatAsRegex = false, bool? pauseEmulation = null, LogLevel level = null)
         {
             CheckLogTester();
 
             // Passing `level` as a named argument causes a compiler crash in Mono 6.8.0.105+dfsg-3.4
             // from Debian
-            var result = logTester.WaitForEntry(pattern, out var _, timeout, true, treatAsRegex, false, level);
+            var result = logTester.WaitForEntry(pattern, out var _, timeout, true, treatAsRegex, pauseEmulation ?? defaultPauseEmulation, level);
             if(result != null)
             {
                 throw new KeywordException($"Unexpected line detected in the log: {result}");
             }
+        }
+
+        [RobotFrameworkKeyword]
+        public void ClearLogTesterHistory()
+        {
+            CheckLogTester();
+            logTester.ClearHistory();
         }
 
         [RobotFrameworkKeyword(replayMode: Replay.Never)]
@@ -374,10 +387,12 @@ namespace Antmicro.Renode.RobotFramework
 
         private LogTester logTester;
         private string cachedLogFilePath;
+        private bool defaultPauseEmulation;
 
         private readonly Monitor monitor;
 
         private const string CachedLogBackendName = "cache";
+        private const int MaxLogContextPrintedOnException = 1000;
 
         private struct Savepoint
         {

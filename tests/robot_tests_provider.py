@@ -104,6 +104,12 @@ def install_cli_arguments(parser):
                         default="mono" if platform.startswith("linux") or platform == "darwin" else "none",
                         help=".NET runner.")
 
+    parser.add_argument("--net",
+                        dest="runner",
+                        action="store_const",
+                        const="dotnet",
+                        help="Use .NET Core runner (alias for --runner=dotnet).")
+
     parser.add_argument("--debug-on-error",
                         dest="debug_on_error",
                         action="store_true",
@@ -315,23 +321,26 @@ class RobotTestSuite(object):
 
 
     def _run_remote_server(self, options, iteration_index=1, suite_retry_index=0):
+        if options.runner == 'dotnet':
+            remote_server_name = "Renode.dll"
+            if platform == "win32":
+                tfm = "net6.0-windows10.0.17763.0"
+            else:
+                tfm = "net6.0"
+            configuration = os.path.join(options.configuration, tfm)
+        else:
+            remote_server_name = options.remote_server_name
+            configuration = options.configuration
+
         if options.remote_server_full_directory is not None:
             if not os.path.isabs(options.remote_server_full_directory):
                 options.remote_server_full_directory = os.path.join(this_path, options.remote_server_full_directory)
 
             self.remote_server_directory = options.remote_server_full_directory
         else:
-            self.remote_server_directory = os.path.join(options.remote_server_directory_prefix, options.configuration)
+            self.remote_server_directory = os.path.join(options.remote_server_directory_prefix, configuration)
 
-        remote_server_binary = os.path.join(self.remote_server_directory, options.remote_server_name)
-
-        if options.runner == 'dotnet':
-            if platform == "win32":
-                tfm = 'net6.0-windows10.0.17763.0'
-            else:
-                tfm = 'net6.0'
-            self.remote_server_directory = os.path.join(options.remote_server_directory_prefix, options.configuration, tfm)
-            remote_server_binary = os.path.join(self.remote_server_directory, 'Renode.dll')
+        remote_server_binary = os.path.join(self.remote_server_directory, remote_server_name)
 
         if not os.path.isfile(remote_server_binary):
             print("Robot framework remote server binary not found: '{}'! Did you forget to build?".format(remote_server_binary))
@@ -345,7 +354,7 @@ class RobotTestSuite(object):
         if not options.show_log and not options.keep_renode_output:
             command.append('--hide-log')
         if not options.enable_xwt:
-            command.append('--disable-xwt')
+            command.append('--disable-gui')
         if options.debug_on_error:
             command.append('--robot-debug-on-error')
         if options.keep_temps:
@@ -816,7 +825,7 @@ class RobotTestSuite(object):
                                 # If rebot is invoked with only 1 suite, it renames that suite to Test Suite
                                 # instead of wrapping in a new top-level Test Suite. A workaround is to extract
                                 # the suite name from the *.robot file name.
-                                suite_name = os.path.basename(suite.attrib["source"]).strip(".robot")
+                                suite_name = os.path.basename(suite.attrib["source"]).rsplit(".", 1)[0]
                             if test.find("./tags/[tag='skipped']"):
                                 continue # skipped test should not be classified as fail
                             if test.find("./tags/[tag='non_critical']"):
@@ -850,7 +859,7 @@ class RobotTestSuite(object):
                         # If rebot is invoked with only 1 suite, it renames that suite to Test Suite
                         # instead of wrapping in a new top-level Test Suite. A workaround is to extract
                         # the suite name from the *.robot file name.
-                        suite_name = os.path.basename(suite.attrib["source"]).rstrip(".robot")
+                        suite_name = os.path.basename(suite.attrib["source"]).rsplit(".", 1)[0]
 
                     for test in suite.iter('test'):
                         if test.find("./tags/[tag='skipped']"):
@@ -912,7 +921,7 @@ class RobotTestSuite(object):
                     # If rebot is invoked with only 1 suite, it renames that suite to Test Suite
                     # instead of wrapping in a new top-level Test Suite. A workaround is to extract
                     # the suite name from the *.robot file name.
-                    suite_name = os.path.basename(suite.attrib["source"]).strip(".robot")
+                    suite_name = os.path.basename(suite.attrib["source"]).rsplit(".", 1)[0]
                 for test in suite.iter('test'):
                     test_name = test.attrib['name']
                     tags = []

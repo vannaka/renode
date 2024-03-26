@@ -33,7 +33,8 @@ PYTHONVERSION=3.8
 
 COMMON_SCRIPT=$DIR/tests/common.sh
 TEST_SCRIPT=linux/renode-test
-copy_bash_tests_scripts $TEST_SCRIPT $COMMON_SCRIPT
+RUNNER=mono
+copy_bash_tests_scripts $TEST_SCRIPT $COMMON_SCRIPT $RUNNER
 
 COMMAND_SCRIPT=linux/renode
 echo "#!/bin/sh" > $COMMAND_SCRIPT
@@ -41,7 +42,7 @@ echo "MONOVERSION=$MONOVERSION" >> $COMMAND_SCRIPT
 echo "REQUIRED_MAJOR=$MONO_MAJOR" >> $COMMAND_SCRIPT
 echo "REQUIRED_MINOR=$MONO_MINOR" >> $COMMAND_SCRIPT
 # skip the first line (with the hashbang)
-tail -n +2 linux/renode-template >> $COMMAND_SCRIPT
+tail -n +2 linux/renode-mono-template >> $COMMAND_SCRIPT
 chmod +x $COMMAND_SCRIPT
 
 PACKAGES=output/packages
@@ -72,8 +73,19 @@ GENERAL_FLAGS=(\
 
 ### create debian package
 fpm -s dir -t deb\
-    -d "mono-complete >= $MONOVERSION" -d "python3 >= $PYTHONVERSION" -d python3-pip -d gtk-sharp2 -d screen -d policykit-1 -d libc6-dev -d gcc \
-    --deb-no-default-config-files \
+    -d "libmono-cil-dev >= $MONOVERSION"\
+    -d "mono-runtime >= $MONOVERSION"\
+    -d "python3 >= $PYTHONVERSION"\
+    -d python3-pip\
+    -d gtk-sharp2-gapi\
+    -d libglade2.0-cil-dev\
+    -d libglib2.0-cil-dev\
+    -d libgtk2.0-cil-dev\
+    -d screen\
+    -d policykit-1\
+    -d libc6-dev\
+    -d gcc\
+    --deb-no-default-config-files\
     "${GENERAL_FLAGS[@]}" >/dev/null
 
 mkdir -p $OUTPUT
@@ -83,9 +95,15 @@ echo "Created a Debian package in $PACKAGES/$deb"
 ### create rpm package
 #redhat-rpm-config is apparently required for GCC to work in Docker images
 fpm -s dir -t rpm\
-    -d "mono-complete >= $MONOVERSION" -d "python3-devel >= $PYTHONVERSION" -d python3-pip -d gcc -d redhat-rpm-config -d gtk-sharp2 -d screen -d beesu \
-    "${GENERAL_FLAGS[@]}" >/dev/null
-
+     -d "mono-core >= $MONOVERSION"\
+     -d python3-pip\
+     -d gcc\
+     -d redhat-rpm-config\
+     -d gtk-sharp2\
+     -d screen\
+     -d polkit\
+     "${GENERAL_FLAGS[@]}" >/dev/null
+ 
 rpm=(renode*rpm)
 mv $rpm $OUTPUT
 echo "Created a Fedora package in $PACKAGES/$rpm"

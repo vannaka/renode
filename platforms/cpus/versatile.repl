@@ -13,15 +13,15 @@ pci: PCI.VersatilePCI @ {
 memory: Memory.MappedMemory @ sysbus 0
     size: 0x10000000
 
-pic: IRQControllers.PL190 @ sysbus <0x10140000, +0x1000>
+pic: IRQControllers.PL190_VIC @ sysbus 0x10140000
     [IRQ, FIQ] -> cpu@[0,1]
 
 sic: IRQControllers.SIC @ sysbus <0x10003000, +0x1000>
     [0-31] -> pic@[0-31]
 
 sysctl: Miscellaneous.ArmSysCtl @ sysbus <0x10000000, +0x1000>
-timer1: Timers.SP804 @ sysbus 0x101E2000 { -> pic@4 }
-timer2: Timers.SP804 @ sysbus 0x101E3000 { -> pic@5 }
+timer1: Timers.ARM_SP804_Timer @ sysbus 0x101E2000 { -> pic@4 }
+timer2: Timers.ARM_SP804_Timer @ sysbus 0x101E3000 { -> pic@5 }
 cpu: CPU.ARMv7A @ sysbus { cpuType: "arm926" }
 smc91x: Network.SMC91X @ sysbus <0x10010000, +0x10000> { -> pic@25 }
 kmi0: Input.PL050 @ sysbus <0x10006000, +0x1000> { -> sic@3 }

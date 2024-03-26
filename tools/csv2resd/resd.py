@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from grammar import resd_header, data_block, data_block_sample_frequency, data_block_header, data_block_subheader, BLOCK_TYPE, SAMPLE_TYPE
+from grammar import resd_header, data_block, data_block_sample_frequency, data_block_sample_arbitrary, data_block_header, data_block_subheader, data_block_metadata_item, BLOCK_TYPE, SAMPLE_TYPE
 
 __VERSION__ = 1
 
@@ -111,11 +111,11 @@ class RESDBlockConstantFrequency(RESDBlock):
 
     @property
     def frequency(self):
-        return int(1e9) // self.__period
+        return 1e9 / self.__period
 
     @frequency.setter
     def frequency(self, value):
-        self.__period = int(1e9) // value
+        self.__period = int(1e9 / value)
 
     @property
     def start_time(self):
