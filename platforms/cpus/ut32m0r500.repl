@@ -35,6 +35,9 @@ timer1: Timers.ARM_SP804_Timer @ sysbus 0x40002000
     frequency: 50000000
     -> nvic@2
 
+adc: Analog.CAES_ADC @ sysbus 0x4000F000
+    -> nvic@21
+
 gpio0: GPIOPort.ARM_AHB_GPIO @ sysbus 0x40020000
     -> nvic@22
 
@@ -54,9 +57,15 @@ gpio2: GPIOPort.ARM_AHB_GPIO @ sysbus 0x40022000
     alternateFunctionResetValue: 0xFFFF
     -> nvic@24
 
+can0: CAN.UT32_CAN @ sysbus 0x40023000
+    -> nvic@16
+
+can1: CAN.UT32_CAN @ sysbus 0x40024000
+    -> nvic@17
+
 nvic: IRQControllers.NVIC @ sysbus 0xE000E000
     priorityMask: 0xF0
-    systickFrequency: 72000000
+    systickFrequency: 50000000
     IRQ -> cpu@0
 
 cpu: CPU.CortexM @ sysbus
@@ -75,8 +84,5 @@ sysbus:
         Tag <0x4000B000 0x1000> "Trim Control"
         Tag <0x4000C000 0x1000> "NFC"
         Tag <0x4000E000 0x1000> "Comparators"
-        Tag <0x4000F000 0x1000> "ADC"
-        Tag <0x40023000 0x1000> "AHB CAN 0"
-        Tag <0x40024000 0x1000> "AHB CAN 1"
         Tag <0x4002F000 0x1000> "System Controller"
         Tag <0xE0000000 0x1000> "Private peripheral bus addresses in the Cortex-M0+"

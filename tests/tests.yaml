@@ -7,11 +7,14 @@
 - tests/example.robot
 - tests/platforms/CC2538/cc2538_cryptoprocessor.robot
 - tests/platforms/QuarkC1000.robot
+- tests/unit-tests/arm-signals-unit.robot
 - tests/unit-tests/llvm-disassemble.robot
 - tests/unit-tests/emulation-environment.robot
 - tests/unit-tests/platform_descriptions.robot
+- tests/unit-tests/sysbus.robot
 - tests/platforms/SiFive-FE310/SiFive-FE310.robot
 - tests/platforms/SiFive-FU540.robot
+- tests/platforms/SiFive-FU740.robot
 - tests/platforms/PicoSoC.robot
 - tests/platforms/MiV/MiV.robot
 - tests/platforms/STM32F103.robot
@@ -116,7 +119,6 @@
 - tests/unit-tests/page-access-via-io.robot
 - tests/unit-tests/precise-pause.robot
 - tests/unit-tests/peripheral-hooks.robot
-- tests/platforms/xilinx_zynqmp_r5.robot
 - tests/platforms/zynqmp.robot
 - tests/unit-tests/uart-tester.robot
 - tests/platforms/ARMv8A-Linux.robot
@@ -125,6 +127,7 @@
 - tests/peripherals/MB85RC1MT.robot
 - tests/platforms/nucleo_f429zi.robot
 - tests/peripherals/SynopsysDWCEthernetQualityOfService.robot
+- tests/peripherals/S32K3XX_EMAC.robot
 - tests/unit-tests/ARMv8R_TCM.robot
 - tests/tools/execution_tracer_reader.robot
 - tests/peripherals/LIS2DW12.robot
@@ -142,3 +145,6 @@
 - tests/platforms/GR712RC.robot
 - tests/platforms/nucleo_h753zi.robot
 - tests/platforms/EK-RA2E1.robot
+- tests/peripherals/UT32_CAN.robot
+- tests/peripherals/S32K3XX_FlexCAN.robot
+- tests/platforms/BeagleV-StarLight.robot

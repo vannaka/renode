@@ -207,7 +207,7 @@ pit3: Timers.S32K3XX_PeriodicInterruptTimer @ sysbus 0x40300000
     oscillatorFrequency: 12_000_000
     -> nvic0@99
 
-rtc: Timers.S32K3XX_RealTimeClock @ sysbus 0x40288000 
+rtc: Timers.S32K3XX_RealTimeClock @ sysbus 0x40288000
     -> nvic0@102
 
 lpi2c0: I2C.S32K3XX_LowPowerInterIntegratedCircuit @ sysbus 0x40350000
@@ -235,86 +235,110 @@ lpspi5: SPI.IMXRT_LPSPI @ sysbus 0x404C0000
     -> nvic0@170
 
 flex_io: Miscellaneous.S32K3XX_FlexIO @ sysbus 0x40324000
+    Frequency: 48000000
+    -> nvic0@139
 
 lpuart0: UART.Kinetis_LPUART @ sysbus 0x40328000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 16
     IRQ -> nvic0@141
 
 lpuart1: UART.Kinetis_LPUART @ sysbus 0x4032C000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 16
     IRQ -> nvic0@142
 
 lpuart2: UART.Kinetis_LPUART @ sysbus 0x40330000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@143
 
 lpuart3: UART.Kinetis_LPUART @ sysbus 0x40334000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@144
 
 lpuart4: UART.Kinetis_LPUART @ sysbus 0x40338000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@145
 
 lpuart5: UART.Kinetis_LPUART @ sysbus 0x4033C000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@146
 
 lpuart6: UART.Kinetis_LPUART @ sysbus 0x40340000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@147
 
 lpuart7: UART.Kinetis_LPUART @ sysbus 0x40344000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@148
 
 lpuart8: UART.Kinetis_LPUART @ sysbus 0x4048C000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@149
 
 lpuart9: UART.Kinetis_LPUART @ sysbus 0x40490000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@150
 
 lpuart10: UART.Kinetis_LPUART @ sysbus 0x40494000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@151
 
 lpuart11: UART.Kinetis_LPUART @ sysbus 0x40498000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@152
 
 lpuart12: UART.Kinetis_LPUART @ sysbus 0x4049C000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@153
 
 lpuart13: UART.Kinetis_LPUART @ sysbus 0x404A0000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@154
 
 lpuart14: UART.Kinetis_LPUART @ sysbus 0x404A4000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@155
 
 lpuart15: UART.Kinetis_LPUART @ sysbus 0x404A8000
-    frequency: 48000000
+    frequency: 24000000
     fifoSize: 4
     IRQ -> nvic0@156
+
+can0: CAN.S32K3XX_FlexCAN @ sysbus 0x40304000
+    numberOfMessageBuffers: 96
+    enhancedRxFifoSize: 20
+
+can1: CAN.S32K3XX_FlexCAN @ sysbus 0x40308000
+    numberOfMessageBuffers: 96
+    enhancedRxFifoSize: 20
+
+can2: CAN.S32K3XX_FlexCAN @ sysbus 0x4030C000
+    numberOfMessageBuffers: 96
+    enhancedRxFifoSize: 20
+
+can3: CAN.S32K3XX_FlexCAN @ sysbus 0x40310000
+
+can4: CAN.S32K3XX_FlexCAN @ sysbus 0x40314000
+
+can5: CAN.S32K3XX_FlexCAN @ sysbus 0x40318000
+
+can6: CAN.S32K3XX_FlexCAN @ sysbus 0x4031C000
+
+can7: CAN.S32K3XX_FlexCAN @ sysbus 0x40320000
 
 mc_cgm_mux_0_css: Python.PythonPeripheral @ sysbus 0x402D8304
     size: 0x4
@@ -415,6 +439,26 @@ mc_cgm_mux_19_css: Python.PythonPeripheral @ sysbus 0x402D87C4
     size: 0x4
     initable: true
     filename: "scripts/pydev/flipflop.py"
+
+gmac0: Network.S32K3XX_GMAC @ sysbus 0x40484000
+    systemClockFrequency: 50000000
+    -> nvic0@224
+    Channel0TX -> nvic0@225
+    Channel0RX -> nvic0@226
+    Channel1TX -> nvic0@227
+    Channel1RX -> nvic0@228
+    Channel2TX -> nvic0@229
+    Channel2RX -> nvic0@230
+
+gmac1: Network.S32K3XX_GMAC @ sysbus 0x40488000
+    systemClockFrequency: 50000000
+    -> nvic0@171
+    Channel0TX -> nvic0@172
+    Channel0RX -> nvic0@233
+    Channel1TX -> nvic0@234
+    Channel1RX -> nvic0@235
+    Channel2TX -> nvic0@236
+    Channel2RX -> nvic0@237
 
 sysbus:
     init:
@@ -547,26 +591,8 @@ sysbus:
         Tag <0x40080000 0xA0> "TRGMUX"
 
         // Communication
-        Tag <0x40304000 0xDB0> "CAN_0"
-        Tag <0x40307000 0x200> "CAN_0 filter"
-        Tag <0x40308000 0xDB0> "CAN_1"
-        Tag <0x4030B000 0x200> "CAN_1 filter"
-        Tag <0x4030C000 0xDB0> "CAN_2"
-        Tag <0x4030F000 0x200> "CAN_2 filter"
-        Tag <0x40310000 0xDB0> "CAN_3"
-        Tag <0x40313000 0x200> "CAN_3 filter"
-        Tag <0x40314000 0xDB0> "CAN_4"
-        Tag <0x40317000 0x200> "CAN_4 filter"
-        Tag <0x40318000 0xDB0> "CAN_5"
-        Tag <0x4031B000 0x200> "CAN_5 filter"
-        Tag <0x4031C000 0xDB0> "CAN_6"
-        Tag <0x4031F000 0x200> "CAN_6 filter"
-        Tag <0x40320000 0xDB0> "CAN_7"
-        Tag <0x40323000 0x200> "CAN_7 filter"
         Tag <0x4036C000 0xE4> "SAI_0"
         Tag <0x404DC000 0xE4> "SAI_1"
-        Tag <0x40484000 0x1270> "GMAC_0"
-        Tag <0x40488000 0x1270> "GMAC_1"
         Tag <0x404CC000 0x940> "QuadSPI"
         Tag <0x67000000 0x400> "QuadSPI RX buffer"
         Tag <0x68000000 0x80> "QuadSPI_ARDB"

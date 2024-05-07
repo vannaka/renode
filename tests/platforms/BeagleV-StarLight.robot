@@ -1,23 +1,92 @@
+*** Variables ***
+${SCRIPT}                     @scripts/single-node/beaglev_starlight.resc
+${MACHINE0}                   machine0
+${MACHINE1}                   machine1
+${MAC_ADDR0}                  66:34:B0:6C:DE:A0
+${MAC_ADDR1}                  66:34:B0:6C:DE:A1
+${IP_ADDR0}                   192.168.0.5
+${IP_ADDR1}                   192.168.0.6
+${UART}                       sysbus.uart3
+
+
+*** Keywords ***
+Create Machine
+    [Arguments]              ${machine}
+    Execute Command          $name="${machine}"
+    Execute Command          include @${SCRIPT}
+    ${tester} =              Create Terminal Tester   ${UART}   40   ${machine}   defaultPauseEmulation=True
+    [Return]                 ${tester}
+
+Connect Machines To Switch
+    Execute Command          emulation CreateSwitch "switch"
+    Execute Command          connector Connect sysbus.ethernet switch   machine=${MACHINE0}
+    Execute Command          connector Connect sysbus.ethernet switch   machine=${MACHINE1}
+
+Verify U-Boot
+    [Arguments]              ${tester}
+    Wait For Line On Uart    OpenSBI v0.9                  testerId=${tester}
+    Wait For Line On Uart    Platform Name\\s+: StarFive   testerId=${tester}   treatAsRegex=true
+    Wait For Line On Uart    U-Boot 2021.01                testerId=${tester}
+    Wait For Prompt On Uart  dwmac.10020000                testerId=${tester}
+
+Login
+    [Arguments]              ${tester}
+    Wait For Prompt On Uart  buildroot login:     testerId=${tester}
+    Write Line To Uart       root                 testerId=${tester}
+
+    Wait For Prompt On Uart  Password:            testerId=${tester} 
+    Write Line To Uart       starfive             testerId=${tester}     waitForEcho=false
+
+Test Ping
+    [Arguments]              ${packet_size}=56
+    ${tester} =              Create Terminal Tester   ${UART}   machine=${MACHINE0}   defaultPauseEmulation=True
+    Write Line To Uart       ping -As ${packet_size} -c 10 ${IP_ADDR0}   testerId=${tester}   waitForEcho=false
+    Wait For Line On Uart    10 packets transmitted, 10 packets received, 0% packet loss  testerId=${tester}
+
+
 *** Test Cases ***
-Should Print Help
-    Execute Command          include @scripts/single-node/beaglev_starlight.resc
-    Create Terminal Tester   sysbus.uart3  1
+Should Boot U-Boot
+    ${tester0} =         Create Machine           ${MACHINE0}
+    ${tester1} =         Create Machine           ${MACHINE1}
 
-    Start Emulation
+    Verify U-Boot  ${tester0}
+    Verify U-Boot  ${tester1}
 
-    Wait For Line On Uart    OpenSBI v0.9
-    Wait For Line On Uart    Platform Name\\s+: StarFive     treatAsRegex=true
+    Provides                 booted-uboot   Reexecution
 
-    Wait For Line On Uart    U-Boot 2021.01
+Should Provide Two Linux Machines With Ethernet Connection
+    Requires                 booted-uboot
 
-    Wait For Prompt On Uart  dwmac.10020000
-    # send Enter press
-    Send Key To Uart         0xD
+    Connect Machines To Switch
 
-    Wait For Prompt On Uart  StarFive #
-    Write Line To Uart       help
+    ${tester0} =             Create Terminal Tester   ${UART}   machine=${MACHINE0}   defaultPauseEmulation=True
+    ${tester1} =             Create Terminal Tester   ${UART}   machine=${MACHINE1}   defaultPauseEmulation=True
 
-    Wait For Line On Uart    base\\s+ - print or set address offset       treatAsRegex=true
-    Wait For Line On Uart    cp\\s+ - memory copy                         treatAsRegex=true
-    Wait For Line On Uart    unlz4\\s+ - lz4 uncompress a memory region   treatAsRegex=true
+    Login  ${tester0}
+    Login  ${tester1}
 
+    Wait For Prompt On Uart  \#                                             testerId=${tester0}
+    Write Line To Uart       ifconfig eth0 down                             testerId=${tester0}
+    Wait For Prompt On Uart  \#                                             testerId=${tester1}
+    Write Line To Uart       ifconfig eth0 down                             testerId=${tester1}
+
+    Wait For Prompt On Uart  \#                                             testerId=${tester0}
+    Write Line To Uart       ifconfig eth0 hw ether ${MAC_ADDR0}            testerId=${tester0}
+    Wait For Prompt On Uart  \#                                             testerId=${tester1}
+    Write Line To Uart       ifconfig eth0 hw ether ${MAC_ADDR1}            testerId=${tester1}
+
+    # MTU size must be decreased due to limiations of the driver
+    Wait For Prompt On Uart  \#                                             testerId=${tester0}                                    
+    Write Line To Uart       ifconfig eth0 mtu 440 up ${IP_ADDR0}           testerId=${tester0}  waitForEcho=false
+    Wait For Prompt On Uart  \#                                             testerId=${tester1}                                    
+    Write Line To Uart       ifconfig eth0 mtu 440 up ${IP_ADDR1}           testerId=${tester1}  waitForEcho=false
+
+    Provides                 booted-linux   Reexecution
+
+Should Ping
+    Requires                 booted-linux
+    Test Ping
+
+Should Ping Large Payload
+    Requires                 booted-linux
+    Test Ping                packet_size=3200

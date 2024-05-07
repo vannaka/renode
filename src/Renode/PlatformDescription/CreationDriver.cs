@@ -634,7 +634,14 @@ namespace Antmicro.Renode.PlatformDescription
                 {
                     throw;
                 }
-                var message = string.Format("Exception was thrown during construction of {0}:{1}{2}", friendlyName, Environment.NewLine, constructionException.Message);
+
+                var exceptionMessage = new StringBuilder();
+                exceptionMessage.AppendLine(constructionException.Message);
+                for(var innerException = constructionException.InnerException; innerException != null; innerException = innerException.InnerException)
+                {
+                    exceptionMessage.AppendLine(innerException.Message);
+                }
+                var message = string.Format("Exception was thrown during construction of {0}:{1}{2}", friendlyName, Environment.NewLine, exceptionMessage);
                 HandleError(ParsingError.ConstructionException, responsibleSyntaxElement, message, false);
             }
             return result;
@@ -811,7 +818,7 @@ namespace Antmicro.Renode.PlatformDescription
                         if(!connections.ContainsKey(irqEnd.Number))
                         {
                             HandleError(ParsingError.IrqSourcePinDoesNotExist, multiplexedAttributes,
-                                        $"{objectToSetOn} doesn't have IRQ {irqEnd.Number}.\nAvailable IRQs: {connections.Count}.", false);
+                                        $"{objectToSetOn} doesn't have IRQ {irqEnd.Number}.\nAvailable IRQs: {Misc.PrettyPrintCollection(connections.Keys)}.", false);
                             continue;
                         }
                         source = connections[irqEnd.Number];
