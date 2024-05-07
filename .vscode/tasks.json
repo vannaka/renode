@@ -4,10 +4,21 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build - Debug",
+            "label": "Build - .Net Framework 4.x - Debug",
             "problemMatcher": "$msCompile",
             "type": "shell",
-            "command": "./build.sh -d",
+            "command": "./build2.sh -d",
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Build - .Net Core - Debug",
+            "problemMatcher": "$msCompile",
+            "type": "shell",
+            "command": "./build2.sh -d --net",
             "group": "build",
             "presentation": {
                 "reveal": "silent",
@@ -18,12 +29,23 @@
             "label": "Build - Release",
             "problemMatcher": "$msCompile",
             "type": "shell",
-            "command": "./build.sh",
+            "command": "./build2.sh",
             "group": "build",
             "presentation": {
                 "reveal": "always",
                 "panel": "shared"
             }
+        },
+        {
+            "label": "Launch Renode",
+            "command": "${workspaceFolder}/output/bin/Debug/net6.0-windows10.0.17763.0/Renode.exe",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "args": [
+                "../../gvm53/sys_2_0x/dev/support/renode/GVM53.resc"
+            ],
+            "problemMatcher": []
         }
     ]
 }

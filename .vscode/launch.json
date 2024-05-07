@@ -5,7 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch - Debug",
+            "name": "Launch - Debug - .NET Core",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceRoot}/output/bin/Debug/net6.0-windows10.0.17763.0/Renode.exe",
+            "cwd": "${workspaceRoot}",
+            // "console": "integratedTerminal",
+            "args":[
+                "../../gvm53/sys_2_0x/dev/support/renode/GVM53.resc"
+            ]
+        },
+        {
+            "name": "Build/Launch - Debug",
             "preLaunchTask": "Build - Debug",
             "type": "mono",
             "request": "launch",
@@ -32,9 +43,10 @@
             "name": "(gdb) Tlib Attach",
             "type": "cppdbg",
             "request": "attach",
-            "program": "${workspaceRoot}/output/bin/Debug/Renode.exe",
+            "program": "${workspaceRoot}/output/bin/Debug/net6.0-windows10.0.17763.0/Renode.exe",
             "processId": "${command:pickProcess}",
             "MIMode": "gdb",
+            "miDebuggerPath": "C:/msys64/mingw64/bin/gdb-multiarch.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

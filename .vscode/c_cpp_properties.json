@@ -6,7 +6,7 @@
                 "${workspaceFolder}/src/Infrastructure/src/Emulator/Cores/tlib/**"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            // "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64",

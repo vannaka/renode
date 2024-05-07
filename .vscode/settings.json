@@ -1,10 +1,18 @@
 {
     "dotnet.preferCSharpExtension": true,
     "dotnet.defaultSolution": "Renode.sln",
-    "dotnet.server.useOmnisharp": true,
-    "omnisharp.useModernNet":false,
-    "cmake.sourceDirectory": "/home/luke/Documents/Code/renode/src/Infrastructure/src/Emulator/Cores/tlib",
+    // "dotnet.server.useOmnisharp": true,
+    // "omnisharp.useModernNet":false,
+    "cmake.sourceDirectory": "D:/grmn/prj/avtn/repos/mirror-external/renode/src/Infrastructure/src/Emulator/Cores/tlib",
     "cmake.configureSettings": {
-        "TARGET_ARCH": "arm"
+        "TARGET_ARCH": "arm",
+        "HOST_ARCH": "i386"
     },
+    "terminal.integrated.profiles.windows": {
+        "Cygwin Bash": {
+            "path": ["C:\\cygwin-x86_64\\bin\\bash.exe"],
+            "args": ["--login"]
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "Cygwin Bash"
 }
